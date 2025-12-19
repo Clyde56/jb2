@@ -3,51 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>个人月度加班记录器</title>
+    <title>加班记录系统 - 多设备同步版</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href=" https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css ">
+    <link rel="stylesheet" href=" https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap ">
 </head>
 <body>
-    <div class="container">
+    <!-- 登录/注册模态框 -->
+    <div id="auth-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-circle"></i> 用户登录</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="auth-tabs">
+                    <button class="tab-btn active" data-tab="login">登录</button>
+                    <button class="tab-btn" data-tab="register">注册</button>
+                </div>
+                
+                <!-- 登录表单 -->
+                <form id="login-form" class="auth-form active">
+                    <div class="form-group">
+                        <label for="login-username"><i class="fas fa-user"></i> 用户名</label>
+                        <input type="text" id="login-username" placeholder="请输入用户名" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password"><i class="fas fa-lock"></i> 密码</label>
+                        <input type="password" id="login-password" placeholder="请输入密码" required>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> 登录
+                        </button>
+                    </div>
+                    <div class="auth-message" id="login-message"></div>
+                </form>
+                
+                <!-- 注册表单 -->
+                <form id="register-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="register-username"><i class="fas fa-user-plus"></i> 用户名</label>
+                        <input type="text" id="register-username" placeholder="请输入用户名" required>
+                        <small class="form-hint">用户名将用于登录，请记住它</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password"><i class="fas fa-lock"></i> 密码</label>
+                        <input type="password" id="register-password" placeholder="请输入密码（至少6位）" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password"><i class="fas fa-lock"></i> 确认密码</label>
+                        <input type="password" id="confirm-password" placeholder="请再次输入密码" required>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-user-plus"></i> 注册
+                        </button>
+                    </div>
+                    <div class="auth-message" id="register-message"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主应用界面 -->
+    <div class="container" id="main-app">
         <header>
-            <h1><i class="fas fa-clock"></i> 我的加班日历</h1>
-            <p class="subtitle">点击日期切换状态：未加班 → 半天 → 全天</p>
+            <div class="header-top">
+                <h1><i class="fas fa-clock"></i> 加班记录系统</h1>
+                <div class="user-info" id="user-info">
+                    <span id="current-user"></span>
+                    <button id="logout-btn" class="btn-secondary">
+                        <i class="fas fa-sign-out-alt"></i> 退出
+                    </button>
+                </div>
+            </div>
+            <p class="subtitle">点击日期切换状态：未加班 → 半天 → 全天 | 数据自动云端同步</p>
         </header>
 
         <main>
             <div class="control-panel">
-                <button id="prev-month"><i class="fas fa-chevron-left"></i> 上月</button>
+                <button id="prev-month" class="btn-icon">
+                    <i class="fas fa-chevron-left"></i> 上月
+                </button>
                 <h2 id="current-month">2025年12月</h2>
-                <button id="next-month">下月 <i class="fas fa-chevron-right"></i></button>
-                <button id="reset-month" class="reset-btn"><i class="fas fa-redo"></i> 重置本月</button>
+                <button id="next-month" class="btn-icon">
+                    下月 <i class="fas fa-chevron-right"></i>
+                </button>
+                <button id="reset-month" class="btn-warning">
+                    <i class="fas fa-redo"></i> 重置本月
+                </button>
+                <button id="sync-btn" class="btn-success">
+                    <i class="fas fa-sync-alt"></i> 手动同步
+                </button>
             </div>
 
             <div class="calendar" id="calendar">
-                <!-- 日历网格将由JavaScript动态生成 -->
+                <!-- 日历网格由JavaScript动态生成 -->
             </div>
 
             <div class="stats-panel">
                 <div class="stat-box">
-                    <h3><i class="fas fa-calendar-day"></i> 本月统计</h3>
-                    <p>全天加班: <span id="count-full">0</span> 天</p>
-                    <p>半天加班: <span id="count-half">0</span> 天</p>
-                    <p>总计加班: <span id="count-total">0</span> 天</p>
+                    <h3><i class="fas fa-chart-bar"></i> 本月统计</h3>
+                    <div class="stat-item">
+                        <span class="stat-label">全天加班：</span>
+                        <span class="stat-value" id="count-full">0</span> 天
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">半天加班：</span>
+                        <span class="stat-value" id="count-half">0</span> 天
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">总计加班：</span>
+                        <span class="stat-value" id="count-total">0</span> 天
+                    </div>
                     <p class="hint">(1全天 = 2半天)</p>
                 </div>
+                
                 <div class="legend">
-                    <h3><i class="fas fa-key"></i> 图例</h3>
-                    <div class="legend-item"><span class="day-box normal"></span> 未加班/休息</div>
-                    <div class="legend-item"><span class="day-box half"></span> 加半天班</div>
-                    <div class="legend-item"><span class="day-box full"></span> 加全天班</div>
+                    <h3><i class="fas fa-key"></i> 状态说明</h3>
+                    <div class="legend-item">
+                        <span class="day-box normal"></span>
+                        <span class="legend-text">未加班/休息</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="day-box half"></span>
+                        <span class="legend-text">加半天班</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="day-box full"></span>
+                        <span class="legend-text">加全天班</span>
+                    </div>
                 </div>
             </div>
         </main>
 
         <footer>
-            <p>数据保存在你的浏览器本地，清空浏览器缓存会丢失记录。</p>
-            <button id="export-data"><i class="fas fa-download"></i> 导出本月数据 (JSON)</button>
-            <button id="import-data"><i class="fas fa-upload"></i> 导入数据</button>
-            <input type="file" id="file-input" accept=".json" style="display: none;">
+            <div class="footer-content">
+                <p class="sync-status">
+                    <i class="fas fa-cloud"></i> 
+                    <span id="sync-status">数据已同步至云端</span>
+                    <span id="last-sync"></span>
+                </p>
+                <div class="footer-buttons">
+                    <button id="export-data" class="btn-secondary">
+                        <i class="fas fa-download"></i> 导出数据
+                    </button>
+                    <button id="import-data" class="btn-secondary">
+                        <i class="fas fa-upload"></i> 导入数据
+                    </button>
+                    <input type="file" id="file-input" accept=".json" style="display: none;">
+                </div>
+                <p class="footer-note">
+                    数据安全存储于Cloudflare，支持多设备同步访问。
+                    <br>清空浏览器缓存不会丢失数据。
+                </p>
+            </div>
         </footer>
     </div>
 
