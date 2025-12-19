@@ -2,5 +2,5 @@ name = "jiaban"
 compatibility_date = "2025-12-19"
 main = "worker.js"  # 指向你的Worker主文件
 kv_namespaces = [
-  { binding = "OVERTIME_DATA", id = "OVERTIME_DATA" }
+  { binding = "OVERTIME_DATA", id = "c9306c3bf02f433aa9947e6c6c21faee" }
 ]
